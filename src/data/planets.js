@@ -7,6 +7,8 @@ const saturnTexture = '/textures/planets/8k_saturn.jpg'
 const uranusTexture = '/textures/planets/2k_uranus.jpg'
 const neptuneTexture = '/textures/planets/2k_neptune.jpg'
 
+const distnace_factor = 3
+
 
 export const planets = [
     { 
@@ -21,7 +23,7 @@ export const planets = [
     { 
       name: 'Venus', 
       radius: 0.95, 
-      distance: 15, 
+      distance: 15 * distnace_factor, 
       speed: 0.012, 
       color: 0xffa500, 
       texture: venusTexture, 
@@ -30,7 +32,7 @@ export const planets = [
     { 
       name: 'Earth', 
       radius: 1, 
-      distance: 20, 
+      distance: 20 * distnace_factor, 
       speed: 0.01, 
       texture: earthTexture, 
       moons: [{ 
@@ -44,7 +46,7 @@ export const planets = [
     { 
       name: 'Mars', 
       radius: 0.53, 
-      distance: 25, 
+      distance: 25 * distnace_factor, 
       speed: 0.008, 
       texture: marsTexture, 
       moons: [{ 
@@ -64,7 +66,7 @@ export const planets = [
     { 
       name: 'Jupiter', 
       radius: 3.5, 
-      distance: 55, 
+      distance: 55 * distnace_factor, 
       speed: 0.005, 
       texture: jupiterTexture, 
       moons: [{ 
@@ -84,7 +86,7 @@ export const planets = [
     { 
       name: 'Saturn', 
       radius: 3, 
-      distance: 85, 
+      distance: 85 * distnace_factor, 
       speed: 0.004, 
       texture: saturnTexture, 
       moons: [{ 
@@ -104,7 +106,7 @@ export const planets = [
     { 
       name: 'Uranus', 
       radius: 2.5, 
-      distance: 160, 
+      distance: 160 * distnace_factor, 
       speed: 0.003, 
       texture: uranusTexture, 
       moons: [{ 
@@ -124,7 +126,7 @@ export const planets = [
     { 
       name: 'Neptune', 
       radius: 2.4, 
-      distance: 240, 
+      distance: 240 * distnace_factor, 
       speed: 0.002, 
       texture: neptuneTexture, 
       moons: [{ 

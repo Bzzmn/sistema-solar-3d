@@ -29,7 +29,7 @@ function App() {
           position: [100, 30, 0],
           fov: 45,
           near: 0.1,
-          far: 400
+          far: 600
         }}
         gl={{
           antialias: true,

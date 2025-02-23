@@ -1,13 +1,15 @@
-import { useRef, useEffect } from 'react'
-import { useThree, useLoader } from '@react-three/fiber'
+import { useRef, useEffect, useCallback } from 'react'
+import { useFrame, useThree, useLoader } from '@react-three/fiber'
 import { OrbitControls, useTexture } from '@react-three/drei'
-import { CubeTextureLoader, Vector3 } from 'three'
+import { CubeTextureLoader } from 'three'
 import gsap from 'gsap'
 import { planets } from '../data/planets'
 import Planet from './Planet'
 
 function Scene() {
   const sunRef = useRef()
+  const followingRef = useRef(null)
+  const controlsRef = useRef()
   const { camera, scene } = useThree()
   
   const sunTexture = useTexture('/textures/planets/8k_sun.jpg')
@@ -20,23 +22,94 @@ function Scene() {
     '/textures/planets/cubemap/Standard-Cube-Map/nz.png'
   ]])
 
-  useEffect(() => {
-    const goToPlanet = (planetName) => {
-      let targetObject = scene.getObjectByName(planetName);
-      if (!targetObject) return;
-      const worldPosition = new Vector3();
-      targetObject.getWorldPosition(worldPosition);
-      const distance = planetName === 'Sun' ? 15 : targetObject.scale.x * 10;
+  useFrame(() => {
+    // Rotación del sol
+    if (sunRef.current) {
+      sunRef.current.rotation.y += 0.001;
+    }
+
+    // Seguimiento del planeta
+    if (followingRef.current) {
+      const planet = planets.find(p => p.name === followingRef.current);
+      if (planet) {
+        const targetObject = scene.getObjectByName(followingRef.current);
+        if (targetObject) {
+          const angle = targetObject.rotation.y;
+          const planetX = Math.cos(angle) * planet.distance;
+          const planetZ = Math.sin(angle) * planet.distance;
+
+          // Mantener la cámara en una posición fija relativa al planeta
+          const distanceFromPlanet = planet.radius * 20;
+          const cameraOffset = distanceFromPlanet * 0.3;
+          // const heightFactor = planet.radius * 8;
+
+          camera.position.x = planetX + (planetX / planet.distance) * cameraOffset;
+          camera.position.y = 0;
+          camera.position.z = planetZ + (planetZ / planet.distance) * cameraOffset;
+
+          camera.lookAt(planetX, 0, planetZ);
+
+          if (controlsRef.current) {
+            controlsRef.current.target.set(planetX, 0, planetZ);
+            controlsRef.current.update();
+          }
+        }
+      }
+    }
+  });
+
+  const goToPlanet = useCallback((planetName) => {
+    let targetObject = scene.getObjectByName(planetName);
+    if (!targetObject) return;
+
+    if (planetName === 'Sun') {
+      console.log('moving to sun')
+      followingRef.current = null;
       gsap.to(camera.position, {
         duration: 1.5,
-        x: worldPosition.x,
-        y: distance * 0.5,
-        z: worldPosition.z + distance,
+        x: 0,
+        y: 10,
+        z: 30,
         ease: "power2.inOut",
-        onUpdate: () => camera.lookAt(worldPosition)
+        onUpdate: () => {
+          camera.lookAt(0, 0, 0);
+          controlsRef.current?.target.set(0, 0, 0);
+          controlsRef.current?.update();
+        }
       });
-    };
+      return;
+    }
 
+    const planet = planets.find(p => p.name === planetName);
+    if (!planet) return;
+
+    const angle = targetObject.rotation.y;
+    const planetX = Math.cos(angle) * planet.distance;
+    const planetZ = Math.sin(angle) * planet.distance;
+
+    const distanceFromPlanet = planet.radius * 20;
+    const cameraOffset = distanceFromPlanet * 0.8;
+    const heightFactor = planet.radius * 3;
+
+    const finalCameraX = planetX + (planetX / planet.distance) * cameraOffset;
+    const finalCameraY = heightFactor;
+    const finalCameraZ = planetZ + (planetZ / planet.distance) * cameraOffset;
+
+    gsap.to(camera.position, {
+      duration: 0,
+      x: finalCameraX,
+      y: finalCameraY,
+      z: finalCameraZ,
+      ease: "power2.inOut",
+      onUpdate: () => camera.lookAt(planetX, 0, planetZ),
+      onComplete: () => {
+        followingRef.current = planetName;
+      }
+    });
+
+  }, [camera, scene, controlsRef]);
+
+  useEffect(() => {
     const handlePlanetClick = (event) => {
       const planetName = event.target.dataset.planet;
       if (planetName) goToPlanet(planetName);
@@ -51,7 +124,7 @@ function Scene() {
         btn.removeEventListener('click', handlePlanetClick);
       });
     };
-  }, [camera, scene]);
+  }, [camera, scene, goToPlanet]);
 
   return (
     <>
@@ -59,25 +132,50 @@ function Scene() {
       <color attach="background" args={['#000']} />
       <primitive object={cubeMap} attach="background" />
       
-      <pointLight position={[0, 0, 0]} intensity={10000} />
-      <ambientLight intensity={1.5} />
+      {/* Luz del sol */}
+      <pointLight position={[0, 0, 0]} intensity={7000} />
+      
+      {/* Luz ambiental principal */}
+      <ambientLight intensity={0.3} />
+      
+      {/* Luz hemisférica para mejor iluminación global */}
+      <hemisphereLight 
+        skyColor="#ffffff"
+        groundColor="#444444"
+        intensity={3}
+        position={[0, 50, 0]}
+      />
+      
+      {/* Luz direccional suave para sombras sutiles */}
+      <directionalLight
+        position={[10, 10, 5]}
+        intensity={0.2}
+        color="#ffffff"
+      />
       
       <OrbitControls 
+        ref={controlsRef}
         enableDamping 
         dampingFactor={0.25}
         maxDistance={300}
         minDistance={5}
-        minPolarAngle={0}
-        maxPolarAngle={Math.PI}
+        minPolarAngle={Math.PI * 0.3}
+        maxPolarAngle={Math.PI * 0.6}
         minAzimuthAngle={-Infinity}
         maxAzimuthAngle={Infinity}
         enableRotate={true}
         rotateSpeed={0.5}
+        target={[0, 0, 0]}
       />
       
-      <mesh ref={sunRef} scale={5} name="Sun" position={[0, 0, 0]} >
+      <mesh ref={sunRef} scale={4} name="Sun" position={[0, 0, 0]}>
         <sphereGeometry args={[1, 32, 32]} />
-        <meshBasicMaterial map={sunTexture} />
+        <meshStandardMaterial 
+          map={sunTexture}
+          emissive="#000000"
+          emissiveIntensity={1}
+          color="#ffffff"
+        />
       </mesh>
 
       {planets.map((planet) => (
