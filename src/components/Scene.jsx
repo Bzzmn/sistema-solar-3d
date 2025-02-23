@@ -1,16 +1,14 @@
-import { useRef, useEffect, useCallback, useState } from 'react'
-import { useFrame, useThree, useLoader } from '@react-three/fiber'
+import { useRef, useEffect } from 'react'
+import { useThree, useLoader } from '@react-three/fiber'
 import { OrbitControls, useTexture } from '@react-three/drei'
-import { CubeTextureLoader } from 'three'
+import { CubeTextureLoader, Vector3 } from 'three'
 import gsap from 'gsap'
 import { planets } from '../data/planets'
 import Planet from './Planet'
 
 function Scene() {
   const sunRef = useRef()
-  const planetsRef = useRef([])
-  const controlsRef = useRef()
-  const { camera } = useThree()
+  const { camera, scene } = useThree()
   
   const sunTexture = useTexture('/textures/planets/8k_sun.jpg')
   const [cubeMap] = useLoader(CubeTextureLoader, [[
@@ -22,107 +20,26 @@ function Scene() {
     '/textures/planets/cubemap/Standard-Cube-Map/nz.png'
   ]])
 
-  // Agregar estado para controlar la animación inicial
-  const [isInitialAnimation, setIsInitialAnimation] = useState(true)
-  const initialAngle = useRef(0)
-
-  const [isUserInteracting, setIsUserInteracting] = useState(false)
-  const interactionTimer = useRef(null)
-  const lastCameraPosition = useRef({
-    radius: 50,
-    height: 20,
-    angle: 0
-  })
-  
-  const [isReturningToInitial, setIsReturningToInitial] = useState(false)
-  const initialPosition = { x: 50, y: 20, z: 0 }
-
-  // Función para manejar el fin de la interacción
-  const handleInteractionEnd = useCallback(() => {
-    if (interactionTimer.current) {
-      clearTimeout(interactionTimer.current)
-    }
-    
-    interactionTimer.current = setTimeout(() => {
-      setIsUserInteracting(false)
-    }, 5000) // 5 segundos
-  }, [])
-
-  // Modificar useFrame para incluir la condición de interacción
-  useFrame(() => {
-    if (!isUserInteracting) {
-      // Rotación automática desde la última posición conocida
-      initialAngle.current -= 0.0005
-      const radius = lastCameraPosition.current.radius // Usar el radio actual
-      const height = lastCameraPosition.current.height // Mantener la altura actual
-      camera.position.x = Math.cos(initialAngle.current) * radius
-      camera.position.z = Math.sin(initialAngle.current) * radius
-      camera.position.y = height
-      camera.lookAt(0, 0, 0)
-    } else {
-      // Actualizar la última posición conocida
-      lastCameraPosition.current = {
-        radius: Math.sqrt(camera.position.x ** 2 + camera.position.z ** 2), // Radio en el plano XZ
-        height: camera.position.y,
-        angle: Math.atan2(camera.position.z, camera.position.x)
-      }
-      initialAngle.current = lastCameraPosition.current.angle
-    }
-
-    if (sunRef.current) {
-      sunRef.current.rotation.y += 0.0005;
-    }
-
-    planetsRef.current.forEach((planet, index) => {
-      if (planet) {
-        planet.rotation.y += 0.1 * planets[index].speed;
-        planet.position.x = Math.cos(planet.rotation.y) * planets[index].distance;
-        planet.position.z = Math.sin(planet.rotation.y) * planets[index].distance;
-
-        // Animar lunas
-        planet.children.forEach((moon, moonIndex) => {
-          moon.rotation.y += 0.1 * planets[index].moons[moonIndex].speed;
-          moon.position.x = Math.cos(moon.rotation.y) * planets[index].moons[moonIndex].distance;
-          moon.position.z = Math.sin(moon.rotation.y) * planets[index].moons[moonIndex].distance;
-        });
-      }
-    });
-  });
-
-  const goToPlanet = useCallback((planetName) => {
-    let targetObject;
-    let distance;
-
-    if (planetName === 'Sun') {
-      targetObject = sunRef.current;
-      distance = 15;
-    } else {
-      const planetIndex = planets.findIndex(p => p.name === planetName);
-      targetObject = planetsRef.current[planetIndex];
-      distance = planets[planetIndex].radius * 5;
-    }
-
-    const position = targetObject.position.clone();
-
-    gsap.to(camera.position, {
-      duration: 2,
-      x: position.x + distance,
-      y: distance * 0.5,
-      z: position.z + distance,
-      ease: "power2.inOut",
-      onUpdate: () => {
-        camera.lookAt(position);
-        controlsRef.current?.update();
-      }
-    });
-  }, [camera]);
-
   useEffect(() => {
+    const goToPlanet = (planetName) => {
+      let targetObject = scene.getObjectByName(planetName);
+      if (!targetObject) return;
+      const worldPosition = new Vector3();
+      targetObject.getWorldPosition(worldPosition);
+      const distance = planetName === 'Sun' ? 15 : targetObject.scale.x * 10;
+      gsap.to(camera.position, {
+        duration: 1.5,
+        x: worldPosition.x,
+        y: distance * 0.5,
+        z: worldPosition.z + distance,
+        ease: "power2.inOut",
+        onUpdate: () => camera.lookAt(worldPosition)
+      });
+    };
+
     const handlePlanetClick = (event) => {
       const planetName = event.target.dataset.planet;
-      if (planetName) {
-        goToPlanet(planetName);
-      }
+      if (planetName) goToPlanet(planetName);
     };
 
     document.querySelectorAll('.planet-btn').forEach(btn => {
@@ -134,7 +51,7 @@ function Scene() {
         btn.removeEventListener('click', handlePlanetClick);
       });
     };
-  }, [goToPlanet]);
+  }, [camera, scene]);
 
   return (
     <>
@@ -142,47 +59,30 @@ function Scene() {
       <color attach="background" args={['#000']} />
       <primitive object={cubeMap} attach="background" />
       
-      <pointLight position={[0, 0, 0]} intensity={5000} />
-      <ambientLight intensity={0.2} />
+      <pointLight position={[0, 0, 0]} intensity={10000} />
+      <ambientLight intensity={1.5} />
       
       <OrbitControls 
-        ref={controlsRef}
         enableDamping 
         dampingFactor={0.25}
-        maxDistance={170}     // Distancia máxima de zoom out
-        minDistance={10}      // Distancia mínima de zoom in
-        minPolarAngle={Math.PI * 0.4}  // Límite superior (aprox. 36 grados desde arriba)
-        maxPolarAngle={Math.PI * 0.6}  // Límite inferior (aprox. 144 grados desde arriba)
-        enableZoom
-        enableRotate
-        enablePan
-        zoomSpeed={1}
+        maxDistance={300}
+        minDistance={5}
+        minPolarAngle={0}
+        maxPolarAngle={Math.PI}
+        minAzimuthAngle={-Infinity}
+        maxAzimuthAngle={Infinity}
+        enableRotate={true}
         rotateSpeed={0.5}
-        onStart={() => {
-          setIsUserInteracting(true)
-          if (interactionTimer.current) {
-            clearTimeout(interactionTimer.current)
-          }
-        }}
-        onChange={() => {
-          if (interactionTimer.current) {
-            clearTimeout(interactionTimer.current)
-          }
-          interactionTimer.current = setTimeout(() => {
-            setIsUserInteracting(false)
-          }, 5000)
-        }}
       />
       
-      <mesh ref={sunRef} scale={5} name="Sun">
+      <mesh ref={sunRef} scale={5} name="Sun" position={[0, 0, 0]} >
         <sphereGeometry args={[1, 32, 32]} />
         <meshBasicMaterial map={sunTexture} />
       </mesh>
 
-      {planets.map((planet, index) => (
+      {planets.map((planet) => (
         <Planet 
           key={planet.name}
-          ref={el => planetsRef.current[index] = el}
           planetData={planet}
         />
       ))}

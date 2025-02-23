@@ -2,10 +2,12 @@ import { useRef, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useTexture } from '@react-three/drei'
 import PropTypes from 'prop-types'
+import useSolarSystemStore from '../store/solarSystemStore'
 
 /* eslint-disable react/no-unknown-property */
 function Planet({ planetData }) {
   const planetRef = useRef()
+  const isSystemPaused = useSolarSystemStore(state => state.isSystemPaused)
   
   // Cargar texturas con optimizaciones
   const planetTexture = useTexture(planetData.texture, (texture) => {
@@ -31,19 +33,20 @@ function Planet({ planetData }) {
       // Rotación del planeta
       planetRef.current.rotation.y += 0.1 * planetData.speed
       
-      // Órbita
-      const angle = planetRef.current.rotation.y
-      planetRef.current.position.x = Math.cos(angle) * planetData.distance
-      planetRef.current.position.z = Math.sin(angle) * planetData.distance
+      if (!isSystemPaused) {
+        // Órbita
+        const angle = planetRef.current.rotation.y
+        planetRef.current.position.x = Math.cos(angle) * planetData.distance
+        planetRef.current.position.z = Math.sin(angle) * planetData.distance
+      }
     }
   })
 
   return (
-    <group ref={planetRef}>
+    <group ref={planetRef} name={planetData.name}>
       {/* Planeta */}
       <mesh 
         scale={planetData.radius}
-        name={planetData.name}
       >
         <sphereGeometry args={[1, 32, 32]} />
         <meshStandardMaterial 
