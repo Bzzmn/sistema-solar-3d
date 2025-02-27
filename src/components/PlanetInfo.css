@@ -105,16 +105,42 @@
   .planet-info {
     top: 0.5rem;
     left: 0.5rem;
-    padding: 0.75rem;
-    max-width: calc(100% - 2rem);
+    right: 0.5rem;
+    padding: 0.6rem;
+    max-width: unset;
+    width: calc(100% - 2rem);
+    max-height: 55vh;
+    overflow-y: auto;
   }
 
   .planet-info-header h2 {
-    font-size: 1.1rem;
+    font-size: 1rem;
     margin-bottom: 0.5rem;
   }
 
+  .planet-info-content {
+    gap: 0.5rem;
+  }
+
   .info-item {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+    line-height: 1.3;
+  }
+  
+  .info-label {
+    opacity: 0.85;
+  }
+  
+  .planet-info::before {
+    font-size: 0.7rem;
+  }
+  
+  /* Hide scrollbar but keep functionality */
+  .planet-info::-webkit-scrollbar {
+    width: 0px;
+  }
+  
+  .planet-info {
+    scrollbar-width: none;
   }
 } 

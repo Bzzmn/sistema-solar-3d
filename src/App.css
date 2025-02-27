@@ -234,19 +234,22 @@ button[data-planet="Sun"]:hover {
 
   button[data-planet="Sun"] {
     font-size: 1.1rem;
-    padding: 0.5rem;
-    flex-direction: row;
-    gap: 0.5rem;
+    padding: 0.3rem;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    gap: 0.3rem;
   }
 
   button[data-planet="Sun"]::before {
-    font-size: 0.8rem;
-    margin-right: 4px;
+    font-size: 0.7rem;
+    margin: 0;
   }
 
   button[data-planet="Sun"]::after {
-    font-size: 1.1rem;
-    margin-left: auto;
+    font-size: 1rem;
+    margin: 0;
   }
 }
 

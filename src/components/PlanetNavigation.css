@@ -63,16 +63,65 @@
   .planet-navigation {
     width: 95vw;
     padding: 0.5rem;
+    bottom: 0.5rem;
+  }
+
+  .planet-navigation::before {
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
   }
 
   .planet-navigation-container {
-    grid-template-columns: 1fr;
-    gap: 0.4rem;
+    display: grid;
+    grid-template-columns: 0.8fr 1fr 1fr;
+    grid-template-rows: repeat(4, auto);
+    gap: 0.35rem;
   }
 
+  /* Sun button takes first column */
   .planet-navigation-container > *:first-child {
-    grid-row: span 1;
-    height: 3rem;
+    grid-column: 1;
+    grid-row: 1 / span 4;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  /* First 4 planet buttons (Mercury to Mars) */
+  .planet-navigation-container > *:nth-child(2) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .planet-navigation-container > *:nth-child(3) {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .planet-navigation-container > *:nth-child(4) {
+    grid-column: 2;
+    grid-row: 3;
+  }
+  .planet-navigation-container > *:nth-child(5) {
+    grid-column: 2;
+    grid-row: 4;
+  }
+
+  /* Last 4 planet buttons (Jupiter to Neptune) */
+  .planet-navigation-container > *:nth-child(6) {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  .planet-navigation-container > *:nth-child(7) {
+    grid-column: 3;
+    grid-row: 2;
+  }
+  .planet-navigation-container > *:nth-child(8) {
+    grid-column: 3;
+    grid-row: 3;
+  }
+  .planet-navigation-container > *:nth-child(9) {
+    grid-column: 3;
+    grid-row: 4;
   }
 }
 
