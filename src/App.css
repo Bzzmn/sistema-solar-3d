@@ -21,25 +21,77 @@
 .planet-btn {
   color: #4ade80;
   font-family: monospace;
-  font-size: 1rem;
+  font-size: 0.9rem;
   letter-spacing: 0.5px;
   background: rgba(74, 222, 128, 0.1);
   border: 1px solid rgba(74, 222, 128, 0.2);
-  padding: 8px 16px;
+  padding: 8px 12px;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s ease;
   text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+  width: 100%;
+  height: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* Special styles for the Sun button */
+button[data-planet="Sun"] {
+  font-size: 1.4rem;
+  letter-spacing: 1px;
+  background: rgba(74, 222, 128, 0.15);
+  border-width: 2px;
+  text-shadow: 0 0 15px rgba(74, 222, 128, 0.4);
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+}
+
+button[data-planet="Sun"]::before {
+  content: "go to";
+  font-size: 1rem;
+  margin: 0;
+  opacity: 0.6;
+}
+
+button[data-planet="Sun"]::after {
+  content: "=>";
+  font-size: 1.4rem;
+  margin: 0;
+  opacity: 0.6;
 }
 
 .planet-btn:hover {
   background: rgba(74, 222, 128, 0.2);
   border-color: rgba(74, 222, 128, 0.4);
   text-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+  transform: translateY(-2px);
+}
+
+button[data-planet="Sun"]:hover {
+  background: rgba(74, 222, 128, 0.25);
+  border-color: rgba(74, 222, 128, 0.5);
+  text-shadow: 0 0 20px rgba(74, 222, 128, 0.6);
 }
 
 .planet-btn:active {
-  transform: scale(0.95);
+  transform: translateY(0);
+}
+
+.planet-btn::before {
+  content: "go to";
+  opacity: 0.6;
+  margin-right: 4px;
+}
+
+.planet-btn::after {
+  content: " =>";
+  opacity: 0.6;
+  margin-left: auto;
 }
 
 .logo {
@@ -150,5 +202,122 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .planet-btn {
+    font-size: 0.85rem;
+    padding: 6px 10px;
+  }
+
+  button[data-planet="Sun"] {
+    font-size: 1.2rem;
+    padding: 0.75rem;
+    gap: 0.3rem;
+  }
+
+  button[data-planet="Sun"]::before {
+    font-size: 0.9rem;
+  }
+
+  button[data-planet="Sun"]::after {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .planet-btn {
+    font-size: 0.8rem;
+    padding: 5px 8px;
+  }
+
+  button[data-planet="Sun"] {
+    font-size: 1.1rem;
+    padding: 0.5rem;
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+
+  button[data-planet="Sun"]::before {
+    font-size: 0.8rem;
+    margin-right: 4px;
+  }
+
+  button[data-planet="Sun"]::after {
+    font-size: 1.1rem;
+    margin-left: auto;
+  }
+}
+
+canvas {
+  cursor: move; /* Show the move cursor for orbit controls by default */
+}
+
+/* Add an HTML label to guide users */
+.interaction-help {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(74, 222, 128, 0.2);
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  color: #4ade80;
+  font-family: monospace;
+  font-size: 0.9rem;
+  z-index: 1000;
+  pointer-events: none;
+  text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Tooltip for click-and-hold functionality */
+.planet-tooltip {
+  position: fixed;
+  bottom: 5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(74, 222, 128, 0.2);
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  color: #4ade80;
+  font-family: monospace;
+  font-size: 0.9rem;
+  z-index: 1000;
+  pointer-events: none;
+  text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+  animation: pulse 2s infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.planet-tooltip.visible {
+  opacity: 1;
+}
+
+@keyframes pulse {
+  0% {
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.05);
+  }
+  100% {
+    transform: translateX(-50%) scale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  .interaction-help {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.7rem;
+  }
+  
+  .planet-tooltip {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.7rem;
+    bottom: 4rem;
   }
 }

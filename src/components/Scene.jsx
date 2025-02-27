@@ -5,8 +5,9 @@ import { CubeTextureLoader } from 'three'
 import gsap from 'gsap'
 import { planets } from '../data/planets'
 import Planet from './Planet'
+import PropTypes from 'prop-types'
 
-function Scene() {
+function Scene({ onPlanetSelect }) {
   const sunRef = useRef()
   const followingRef = useRef(null)
   const controlsRef = useRef()
@@ -77,6 +78,7 @@ function Scene() {
           controlsRef.current?.update();
         }
       });
+      onPlanetSelect('Sun');
       return;
     }
 
@@ -96,7 +98,7 @@ function Scene() {
     const finalCameraZ = planetZ + (planetZ / planet.distance) * cameraOffset;
 
     gsap.to(camera.position, {
-      duration: 0,
+      duration: 1.5,
       x: finalCameraX,
       y: finalCameraY,
       z: finalCameraZ,
@@ -107,7 +109,8 @@ function Scene() {
       }
     });
 
-  }, [camera, scene, controlsRef]);
+    onPlanetSelect(planetName);
+  }, [camera, scene, controlsRef, onPlanetSelect]);
 
   useEffect(() => {
     const handlePlanetClick = (event) => {
@@ -159,8 +162,8 @@ function Scene() {
         dampingFactor={0.25}
         maxDistance={300}
         minDistance={5}
-        minPolarAngle={Math.PI * 0.3}
-        maxPolarAngle={Math.PI * 0.6}
+        minPolarAngle={Math.PI * 0.1}  // Allow more vertical movement
+        maxPolarAngle={Math.PI * 0.8}  // Allow more vertical movement
         minAzimuthAngle={-Infinity}
         maxAzimuthAngle={Infinity}
         enableRotate={true}
@@ -168,7 +171,12 @@ function Scene() {
         target={[0, 0, 0]}
       />
       
-      <mesh ref={sunRef} scale={4} name="Sun" position={[0, 0, 0]}>
+      <mesh 
+        ref={sunRef} 
+        scale={4} 
+        name="Sun" 
+        position={[0, 0, 0]} 
+      >
         <sphereGeometry args={[1, 32, 32]} />
         <meshStandardMaterial 
           map={sunTexture}
@@ -188,5 +196,9 @@ function Scene() {
     </>
   );
 }
+
+Scene.propTypes = {
+  onPlanetSelect: PropTypes.func.isRequired
+};
 
 export default Scene; 
