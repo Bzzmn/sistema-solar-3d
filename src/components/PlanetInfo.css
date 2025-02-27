@@ -2,25 +2,24 @@
   position: fixed;
   top: 2rem;
   left: 2rem;
-  background: rgba(0, 0, 0, 0.8);
-  border: 1px solid rgba(74, 222, 128, 0.2);
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(74, 222, 128, 0.4);
   border-radius: 8px;
   padding: 1.5rem;
   color: #4ade80;
   font-family: monospace;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
   max-width: 600px;
   z-index: 1000;
   animation: fadeIn 0.3s ease-out;
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
 }
 
 .planet-info-header h2 {
   font-size: 1.4rem;
   margin: 0 0 1rem 0;
   color: #4ade80;
-  text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.9), 0 0 15px rgba(74, 222, 128, 0.5);
   font-weight: normal;
 }
 
@@ -33,7 +32,7 @@
 .info-item {
   font-size: 0.9rem;
   line-height: 1.4;
-  text-shadow: 0 0 10px rgba(74, 222, 128, 0.2);
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.9), 0 0 10px rgba(74, 222, 128, 0.3);
   opacity: 1;
   transform: translateY(0);
   transition: opacity 0.3s ease, transform 0.3s ease;
